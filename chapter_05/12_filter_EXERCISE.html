@@ -23,10 +23,10 @@
 		  .enter()
 		  .append("p")
 		  .text(function(d) {
-		   return d.Geo_NAME;
+		   return d["Geo_NAME"];
 		  })
 		  .style("color", function(d) {
-		    if (d.median_income > 65323) {return "red"}
+		    if (d["median_income"] > 65323) {return "red"}
 		  	else {return "black"}
 		  });
 

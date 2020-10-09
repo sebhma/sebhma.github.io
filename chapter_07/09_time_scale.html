@@ -5,7 +5,7 @@
 		<title>D3: Time scale</title>
 		<script type="text/javascript" src="../d3.js"></script>
 		<style type="text/css">
-			/* No style rules here yet */		
+			/* No style rules here yet */
 		</style>
 	</head>
 	<body>
@@ -15,7 +15,7 @@
 			var w = 500;
 			var h = 300;
 			var padding = 40;
-			
+
 			var dataset, xScale, yScale;  //Empty, for now
 
 			//For converting strings to Dates
@@ -38,7 +38,7 @@
 
 				//Copy data into global dataset
 				dataset = data;
-                
+
 
 				//Create scale functions
 				xScale = d3.scaleTime()
@@ -54,7 +54,7 @@
 									d3.max(dataset, function(d) { return d.Amount; })
 								])
 							   .range([h - padding, padding]);
-		
+
 				//Create SVG element
 				var svg = d3.select("body")
 							.append("svg")
@@ -92,8 +92,13 @@
 				   })
 				   .attr("r", 2);
 
+					 var rowConverter = function(d) { return {
+	 Date: parseTime(d.Date),
+	 Amount: parseInt(d.Amount) };
+	 }
+
 			});
-			
+
 		</script>
 	</body>
 </html>
