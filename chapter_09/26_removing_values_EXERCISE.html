@@ -139,14 +139,15 @@
 							.data(dataset);
 
 						labels.exit()
-							.remove("text")
 							.text(function(d) {
 								return (d);
 							})
 							.attr("text-anchor", "middle")
-							.attr("x", xScale.bandwidth)
+							.attr("x", function(d, i) {				//Set new x position, based on the updated xScale
+								return xScale(i);
+									})
 							.attr("y", function(d) {
-								yScale(d);
+								return yScale(d);
 							})
 							 .attr("font-family", "sans-serif")
 							 .attr("font-size", "11px")

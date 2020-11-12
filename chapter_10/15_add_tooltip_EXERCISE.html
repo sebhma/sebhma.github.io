@@ -5,7 +5,7 @@
 		<title>D3: Time axis, prettier</title>
 		<script type="text/javascript" src="../d3.js"></script>
 		<style type="text/css">
-			/* No style rules here yet */		
+			/* No style rules here yet */
 		</style>
 	</head>
 	<body>
@@ -16,12 +16,12 @@
             //there are 2 bugs - both in line 42-43 - starting at d3.csv("..
             //fix the file path and the csv function so that the data is loaded and displays correctly
             //Then implement a tooltip of your choice for the circles on rollover.
-            
+
 			//Width and height
 			var w = 600;
 			var h = 400;
 			var padding = 40;
-			
+
 			var dataset, xScale, yScale, xAxis, yAxis;  //Empty, for now
 
 			//For converting strings to Dates
@@ -39,10 +39,11 @@
 			}
 
 			//Load in the data
-			d3.csv("../time_scale_data.csv", rowConverter)
-            .then(function(d) {
+			d3.csv("time_scale_data.csv", rowConverter)
+            .then(function(data) {
 				//Copy data into global dataset
 				dataset = data;
+				console.table(dataset, ["Date", "Amount"]);
 
 				//Discover start and end dates in dataset
 				var startDate = d3.min(dataset, function(d) { return d.Date; });
@@ -98,7 +99,7 @@
 				   .attr("stroke", "#ddd")
 				   .attr("stroke-width", 1);
 
-                   //TODO: 
+                   //TODO:
                    //define a tooltip
                    //call it
 
@@ -122,13 +123,13 @@
                        d3.select(this).attr("fill","black")
                        //TODO: hide tooltip here
                    });
-	   			
+
 	   			//Create X axis
 	   			svg.append("g")
 	   				.attr("class", "axis")
 	   				.attr("transform", "translate(0," + (h - padding) + ")")
 	   				.call(xAxis);
-	   			
+
 	   			//Create Y axis
 	   			svg.append("g")
 	   				.attr("class", "axis")
@@ -136,7 +137,7 @@
 	   				.call(yAxis);
 
 			});
-			
+
 		</script>
 	</body>
 </html>
