@@ -22,23 +22,6 @@
 						[20, 50], [21, 88], [22, 17], [23, 17]
 			    	];
 
-						//Create scale functions
-			var xScale = d3.scaleLinear()
-								 .domain([0, d3.max(dataset, function(d) { return d[0]; })])
-								 ;
-
-			var yScale = d3.scaleLinear()
-								 .domain([0, d3.max(dataset, function(d) { return d[1]; })])
-								 ;
-
-			var aScale = d3.scaleSqrt()
-								 .domain([0, d3.max(dataset, function(d) { return d[1]; })])
-							;
-
-			//Define X axis
-			var xAxis = d3.axisBottom()
-							.scale(xScale);
-
 		//Create SVG element
 		var svg = d3.select("body")
 					.append("svg")
