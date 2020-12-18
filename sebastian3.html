@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Time scale</title>
+		<script type="text/javascript" src="../d3.js"></script>
+		<style type="text/css">
+			/* Basic layout rules */
+			body {
+				display: flex;
+				min-height: 100vh;
+			}
+			.left {
+				flex: 0 0 auto;
+
+			}
+			.right {
+				flex: 1 0 auto;
+			}
+
+			/* .left svg {
+				background-color: #eee;
+			} */
+			.left svg text.name-text {visibility:hidden}
+
+			/* Hover style for scatterplot */
+			.left svg circle:hover {
+				fill: lightgrey;
+			}
+
+
+			/* Copied basic accordion styles */
+			.accordion {
+			  background-color: #eee;
+			  color: #444;
+			  cursor: pointer;
+			  padding: 18px;
+			  width: 100%;
+			  text-align: left;
+			  border: none;
+			  outline: none;
+			  transition: 0.4s;
+			}
+
+			.active, .accordion:hover {
+			  background-color: #ccc;
+			}
+
+			.panel {
+			  padding: 0 18px;
+			  background-color: white;
+			  display: none;
+			  overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="left">
+			<!-- Left section with main scatterplot -->
+		</div>
+		<div class="right">
+			<!-- Right -->
+			<button class="accordion">Texts received per continent over a 24 hour span</button>
+			<div class="panel" id="chart1">
+			  <!-- Continent chart -->
+			</div>
+			<button class="accordion">Texts received by platform</button>
+			<div class="panel" id="chart2">
+				<!-- Platform bars -->
+			</div>
+			<button class="accordion">Most received emojis</button>
+			<div class="panel" id="chart3">
+
+			</div>
+		</div>
+		<script type="text/javascript">
+
+            //ASSIGNMENT: A new dataset was loaded here in this scatterplot called dataset_for_assignment
+            //this dataset contains all 4955 complaints made to 311 on labor day 9/2/2019
+            //this dataset has been formated by hour and count below in the function countHourOccurances
+            //Scales have already been created for you for x and y values
+
+            //5 STEPS:
+            //Draw a scatterplot of this new data with the approperiate scale using the starter code below
+            //label each circle in the plot with the count for that hour
+            //Create a third scale for the radius of the scatterplot
+            //Scale each radius with what you created
+            //adjust the position of the labels.
+
+
+            //you will find that each small task is labeled with the words TODO:
+
+			var w = 1000;
+			var h = 2500;
+			var padding = 100;
+
+			var dataset, xScale, yScale, rScale;
+
+			var formatTime = d3.timeFormat("%H");
+
+			var rowConverter = function(d) {
+                var date = new Date(d["Created Date"])
+				return {
+					Hour: date.getHours(),
+				};
+			}
+
+			d3.csv("temp.csv")
+        .then(function(data) {
+        		var svg = d3.select(".left")
+        					.append("svg")
+        					.attr("width", w)
+        					.attr("height", h);
+
+									// var svg2 = d3.select(".left")
+			        		// 			.append("svg")
+			        		// 			.attr("width", w)
+			        		// 			.attr("height", h);
+// console.log(data[0])
+									for(var i in data){
+
+										if(data[i][0]!="name"){
+											drawOnePerson(data[i],50*i+50)
+										}
+										else{
+											var hours = data[i]
+											// console.log(hours)
+											for(var p in hours){
+  										if(hours[p]=="name"){
+    									  var label = "name"
+												var addedClass = "name-text"
+
+										}else if(parseInt(hours[p])>12){
+
+    									var label = parseInt(hours[p])-12+"pm"
+											var addedClass = ""
+  										}else{
+
+    									var label = hours[p]+"am"
+											var addedClass = ""
+  }
+	svg.append("text")
+	.text(label).attr("class", addedClass).attr("y",20).attr("x",p*36+30)
+	.style("fill", "darkslategrey")
+	.style("font-size", "12px")
+	.style("font-family", "helvetica")
+
+}
+
+
+
+										}
+									}
+               })
+
+function drawOnePerson(personData,vertical){
+  //here is the presonal data that has been cleaned up to have 24 hour clock, and also a name column header
+          //console.log(personData)
+
+// console.log(vertical)
+  //here I am removing the name key, so that all that is left are the counts of texts
+          var keys = Object.keys(personData).sort()
+          keys.pop()
+
+          //console.log(keys)
+
+  //x is the 24 hour clock
+          xScale = d3.scaleLinear()
+          			   .domain([1,24])
+          			   .range([padding, w - padding]);
+//y is the same for this person, you will have to put y in into for loop you will build to go through all persons
+          yScale = d3.scaleLinear()
+                    .domain([0,24])
+                    .range([h - padding*2, padding*2]);
+
+//r can be adjusted, it is set at 100 for now
+          rScale = d3.scaleLinear()
+          	           .domain([1,100])
+          			   .range([2,16]);
+
+         //NEW scale
+          colorScale = d3.scaleLinear()
+          	           .domain([1,3,5,10,20,35,50,100])
+          			   .range(["lemonchiffon","gold","goldenrod","orange","darkorange","orangered","darkred","maroon"]);
+
+//this draws the dots for each of the hours for this person
+//this draws the dots for each of the hours for this person
+var svg = d3.select(".left svg")
+                  // console.log(keys)
+          		svg.selectAll("."+personData["name"])
+          		   .data(keys)
+          		   .enter()
+          		   .append("circle")
+								 .attr("id", function(d, i) {
+									 return "circle-"+personData["name"].replace(/ /g,'').toLowerCase()+"-"+i;
+								 })
+                .attr("class",personData["name"])
+          		   .attr("cx", function(d){
+          			   return xScale(d);
+          		   })
+          		   .attr("cy", function(d,i) {
+                   //this will have to be changed for each person, you can try passing in the index from the loop for this value into the function as you loop through your data
+                   return vertical
+          		   })
+          		   .attr("r", function(d){
+									 if(personData[d]==0){return 0}
+          			   return rScale(personData[d]);
+          		   })
+								 .attr("fill", function(d, i) {
+                   return colorScale(personData[d])
+
+									//return "rgba(57,137,48,"+((personData[d]/158)+0.4)+")";
+								})
+								.append("title")
+								.text(function(d, i) {
+									if (personData[d] == '') {
+										return ""
+									} else {
+
+                    //convert to am pm again, then do same with next hour by adding 1 to d?
+                    if(parseInt(d)>12){
+        									  var thisHour = d-12+"pm "
+      										}else{
+        									  var thisHour = d+"am"
+                      }
+                      if(parseInt(d)+1>12){
+          									  var nextHour = parseInt(d)-11+"pm "
+        										}else{
+          									  var nextHour = (parseInt(d)+1)+"am"
+                        }
+
+                        //end of new code
+
+										return personData["name"]+" sent "+personData[d]+" texts between "+thisHour+"and "+nextHour
+									}
+								});//this line below adds just the name label to the row
+                 svg.append("text").text(personData["name"]).attr('x',10).attr("y",function(d,i) {
+                   //this will have to be changed for each person, you can try passing in the index from the loop for this value into the function as you loop through your data
+                   return vertical
+
+
+          		   })
+
+								 .style("fill", "darkslategrey")
+								 .style("font-size", "14px")
+								 .style("font-family", "helvetica")
+
+
+}
+
+//// End: Scatterplot
+
+//// Start: Continent chart
+
+		d3.csv("continent.csv")
+			.then(function(data) {
+			var svg2 = d3.select("#chart1")
+						.append("svg")
+						.attr("width", 550)
+						.attr("height", 200);
+
+			for(var i in data){
+
+				if(data[i][0]!="Continent"){
+					drawOneContinent(data[i],50*i+50)
+				} else {
+					var hours = data[i]
+					for(var p in hours){
+						if(hours[p]=="Continent"){
+							var label = "Continent"
+						}else if(parseInt(hours[p])>12){
+							var label = parseInt(hours[p])-12+"pm"
+						}else{
+							var label = hours[p]+"am"
+						}
+						// svg2.append("text").text(label).attr("y",20).attr("x",p*30);
+					}
+				}
+			}
+		});
+
+		function drawOneContinent(personData,vertical) {
+     // console.log(personData)
+			var keys = Object.keys(personData).sort()
+			keys.pop()
+			xScale = d3.scaleLinear()
+							 .domain([1,24])
+							 .range([150, 550]);
+			yScale = d3.scaleLinear()
+								.domain([0,24])
+								.range([100, 300]);
+
+								colorScale = d3.scaleLinear()
+								.domain([0,3,5,10,20,35,50,100])
+					 .range(["lemonchiffon","gold","goldenrod","orange","darkorange","orangered","darkred","maroon"]);
+
+			var svg2 = d3.select("#chart1 svg")
+					svg2.selectAll("."+personData["Continent"])
+						 .data(keys)
+						 .enter()
+						 .append("rect")
+						.attr("class",personData["Continent"])
+						 .attr("x", function(d){
+							 return xScale(d);
+						 })
+						 .attr("y", function(d,i) {
+							 return vertical
+						 })
+						 .attr("width",40)
+						 .attr("height",40)
+							.attr("fill", function(d, i) {
+								return colorScale(personData[d])
+					   });
+						 svg2.append("text").text(personData["Continent"]).attr('x',10).attr("y",function(d,i) {
+							 return vertical+22
+
+
+						 })
+		}
+
+//// End: Continent chart
+
+//// Start: Platform bars
+
+d3.csv("platform.csv")
+	.then(function(data) {
+	var svg3 = d3.select("#chart2")
+				.append("svg")
+				.attr("width", 550)
+				.attr("height", 250);
+	for(var i in data){
+		if(data[i][0]!="Platform"){
+			drawOnePlatform(data[i],50*i+50)
+		}
+	}
+});
+
+function drawOnePlatform(personData,vertical) {
+	var keys = Object.keys(personData).sort()
+	keys.pop()
+	xScale = d3.scaleLinear()
+					 .domain([1,24])
+					 .range([150, 550]);
+	yScale = d3.scaleLinear()
+						.domain([0,24])
+						.range([100, 300]);
+
+	var svg3 = d3.select("#chart2 svg")
+			svg3.selectAll("."+personData["Platform"])
+				 .data(keys)
+				 .enter()
+				 .append("rect")
+				.attr("class",personData["Platform"])
+				 .attr("x", 60)
+				 .attr("y", function(d,i) {
+					 return vertical
+				 })
+				 .attr("width", function(d, i) {
+					 return personData["Value"]*2;
+				 })
+				 .attr("height",40);
+
+				 svg3.append('image')
+		      .attr('xlink:href', personData["Image"])
+		      .attr('width',25)
+		      .attr('height',25)
+					.attr('x',10)
+					.attr("y",function(d,i) {
+ 					 return vertical+7
+ 				 });
+
+
+			svg3.selectAll("."+personData["Platform"]+"_text")
+				 .data(keys)
+				 .enter()
+				 .append("text")
+				.attr("class",personData["Platform"]+"_text")
+				 .attr("x", function(d, i) {
+         //  console.log(personData["Value"])
+					 return parseInt(personData["Value"]*2)+70;
+				 })
+				 .attr("y", function(d,i) {
+					 return vertical+20
+				 })
+         .text(function(d,i){
+           return personData["Value"]+"%";
+         })
+
+
+}
+
+//// End: Platform bars
+
+//// Start: Emoji bars
+
+d3.csv("emoji.csv")
+	.then(function(data) {
+	var svg4 = d3.select("#chart3")
+				.append("svg")
+				.attr("width", 550)
+				.attr("height", 250);
+	for(var i in data){
+		if(data[i][0]!="Emoji"){
+			drawOneEmoji(data[i],50*i+50)
+		}
+	}
+});
+
+function drawOneEmoji(personData,vertical) {
+	var keys = Object.keys(personData).sort()
+	keys.pop()
+	xScale = d3.scaleLinear()
+					 .domain([1,24])
+					 .range([150, 550]);
+	yScale = d3.scaleLinear()
+						.domain([0,24])
+						.range([100, 300]);
+
+	var svg4 = d3.select("#chart3 svg")
+			svg4.selectAll(".emoji-"+personData["Emoji"])
+				 .data(keys)
+				 .enter()
+				 .append("rect")
+				.attr("class","emoji-"+personData["Emoji"])
+				 .attr("x", 60)
+				 .attr("y", function(d,i) {
+					 return vertical
+				 })
+				 .attr("width", function(d, i) {
+					 return personData["Value"];
+				 })
+				 .attr("height",40);
+
+				 svg4.append('image')
+		      .attr('xlink:href', personData["Emoji"])
+		      .attr('width',25)
+		      .attr('height',25)
+					.attr('x',10)
+					.attr("y",function(d,i) {
+ 					 return vertical+7
+ 				 });
+
+			svg4.selectAll(".emoji-"+personData["Emoji"]+"_text")
+				 .data(keys)
+				 .enter()
+				 .append("text")
+				.attr("class", "emoji-"+personData["Platform"]+"_text")
+				 .attr("x", function(d, i) {
+         //  console.log(personData["Value"])
+					 return parseInt(personData["Value"])+70;
+				 })
+				 .attr("y", function(d,i) {
+					 return vertical+20
+				 })
+         .text(function(d,i){
+           return personData["Value"]+"%";
+         })
+
+
+}
+
+//// End: Emoji bars
+
+
+
+
+		</script>
+		<script>
+		var acc = document.getElementsByClassName("accordion");
+		var i;
+
+		for (i = 0; i < acc.length; i++) {
+			acc[i].addEventListener("click", function() {
+				this.classList.toggle("active");
+				var panel = this.nextElementSibling;
+				if (panel.style.display === "block") {
+					panel.style.display = "none";
+				} else {
+					panel.style.display = "block";
+				}
+			});
+		}
+		</script>
+	</body>
+</html>
